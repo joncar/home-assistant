@@ -137,6 +137,7 @@ HANDLERS = Registry()
 FLOWS = [
     'cast',
     'deconz',
+    'everlights',
     'hangouts',
     'homematicip_cloud',
     'hue',
