@@ -1,24 +1,25 @@
 """Support for LiteJet switch."""
 import logging
 
-from homeassistant.components import litejet
 from homeassistant.components.switch import SwitchEntity
+
+from .const import DOMAIN
 
 ATTR_NUMBER = "number"
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
-    """Set up the LiteJet switch platform."""
-    litejet_ = hass.data["litejet_system"]
+async def async_setup_entry(hass, config_entry, async_add_devices):
+    """Set up entry."""
+
+    system = hass.data[DOMAIN]
 
     devices = []
-    for i in litejet_.button_switches():
-        name = litejet_.get_switch_name(i)
-        if not litejet.is_ignored(hass, name):
-            devices.append(LiteJetSwitch(hass, litejet_, i, name))
-    add_entities(devices, True)
+    for i in system.button_switches():
+        name = system.get_switch_name(i)
+        devices.append(LiteJetSwitch(hass, system, i, name))
+    async_add_devices(devices, True)
 
 
 class LiteJetSwitch(SwitchEntity):
@@ -32,8 +33,15 @@ class LiteJetSwitch(SwitchEntity):
         self._state = False
         self._name = name
 
-        lj.on_switch_pressed(i, self._on_switch_pressed)
-        lj.on_switch_released(i, self._on_switch_released)
+    async def async_added_to_hass(self):
+        """Run when this Entity has been added to HA."""
+        self._lj.on_switch_pressed(self._index, self._on_switch_pressed)
+        self._lj.on_switch_released(self._index, self._on_switch_released)
+
+    async def async_will_remove_from_hass(self):
+        """Entity being removed from hass."""
+        self._lj.unsubscribe(self._on_switch_pressed)
+        self._lj.unsubscribe(self._on_switch_released)
 
     def _on_switch_pressed(self):
         _LOGGER.debug("Updating pressed for %s", self._name)
@@ -49,6 +57,11 @@ class LiteJetSwitch(SwitchEntity):
     def name(self):
         """Return the name of the switch."""
         return self._name
+
+    @property
+    def unique_id(self):
+        """Return a unique identifier for this switch."""
+        return str(self._index)
 
     @property
     def is_on(self):
@@ -72,3 +85,8 @@ class LiteJetSwitch(SwitchEntity):
     def turn_off(self, **kwargs):
         """Release the switch."""
         self._lj.release_switch(self._index)
+
+    @property
+    def entity_registry_enabled_default(self) -> bool:
+        """Switches are only enabled by explicit user choice."""
+        return False
