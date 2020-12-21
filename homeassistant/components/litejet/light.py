@@ -90,33 +90,33 @@ class LiteJetLight(LightEntity):
 
     def turn_on(self, **kwargs):
         """Turn on the light."""
-        complex = False
+        is_complex = False
         brightness = 99
         transition = self._config_entry.options.get(CONF_DEFAULT_TRANSITION, 0)
 
         if ATTR_BRIGHTNESS in kwargs:
-            complex = True
+            is_complex = True
             brightness = int(kwargs[ATTR_BRIGHTNESS] / 255 * 99)
 
         if ATTR_TRANSITION in kwargs:
-            complex = True
+            is_complex = True
             transition = kwargs[ATTR_TRANSITION]
 
-        if complex:
+        if is_complex:
             self._lj.activate_load_at(self._index, brightness, int(transition))
         else:
             self._lj.activate_load(self._index)
 
     def turn_off(self, **kwargs):
         """Turn off the light."""
-        complex = False
+        is_complex = False
         transition = self._config_entry.options.get(CONF_DEFAULT_TRANSITION, 0)
 
         if ATTR_TRANSITION in kwargs:
-            complex = True
+            is_complex = True
             transition = kwargs[ATTR_TRANSITION]
 
-        if complex:
+        if is_complex:
             self._lj.activate_load_at(self._index, 0, transition)
         else:
             self._lj.deactivate_load(self._index)

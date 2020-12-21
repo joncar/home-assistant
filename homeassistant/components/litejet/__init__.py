@@ -40,7 +40,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         system = pylitejet.LiteJet(port)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         _LOGGER.error("Error connecting to the LiteJet MCP at %s", port)
         return False
 
