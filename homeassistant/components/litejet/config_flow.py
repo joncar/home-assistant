@@ -47,7 +47,9 @@ class LiteJetOptionsFlow(config_entries.OptionsFlow):
 class LiteJetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """LiteJet config flow."""
 
-    async def async_step_user(self, user_input):
+    async def async_step_user(
+        self, user_input: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Create a LiteJet config entry based upon user input."""
         if self.hass.config_entries.async_entries(DOMAIN):
             return self.async_abort(reason="single_instance_allowed")
@@ -59,7 +61,7 @@ class LiteJetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 system = pylitejet.LiteJet(port)
                 system.close()
                 okay = True
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 errors[CONF_PORT] = "open_failed"
                 okay = False
 
