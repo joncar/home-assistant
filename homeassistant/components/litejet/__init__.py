@@ -2,13 +2,13 @@
 import asyncio
 import logging
 
+import pylitejet
 import voluptuous as vol
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import CONF_PORT
 from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
-import pylitejet
 
 from .const import DOMAIN, PLATFORMS
 
