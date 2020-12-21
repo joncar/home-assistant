@@ -1,7 +1,9 @@
 """Tests for LiteJet config flow."""
-from homeassistant.components.litejet.const import DOMAIN
+from homeassistant import data_entry_flow
+from homeassistant.components.litejet.const import CONF_DEFAULT_TRANSITION, DOMAIN
 from homeassistant.const import CONF_PORT
 
+from tests.async_mock import patch
 from tests.common import MockConfigEntry
 
 
@@ -46,6 +48,21 @@ async def test_flow_entry_already_exists(hass):
     assert result["reason"] == "single_instance_allowed"
 
 
+async def test_flow_open_failed(hass):
+    """Test user input when serial port open fails."""
+    test_data = {CONF_PORT: "/dev/test"}
+
+    with patch("pylitejet.LiteJet") as mock_pylitejet:
+        mock_pylitejet.side_effect = Exception
+
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": "user"}, data=test_data
+        )
+
+    assert result["type"] == "form"
+    assert result["errors"][CONF_PORT] == "open_failed"
+
+
 async def test_import_step(hass):
     """Test initializing via import step."""
     test_data = {CONF_PORT: "/dev/imported"}
@@ -56,3 +73,22 @@ async def test_import_step(hass):
     assert result["type"] == "create_entry"
     assert result["title"] == "configuration.yaml"
     assert result["data"] == test_data
+
+
+async def test_options(hass):
+    """Test updating options."""
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_PORT: "/dev/test"})
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+
+    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["step_id"] == "init"
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        user_input={CONF_DEFAULT_TRANSITION: 12},
+    )
+
+    assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
+    assert result["data"] == {CONF_DEFAULT_TRANSITION: 12}
