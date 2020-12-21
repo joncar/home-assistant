@@ -11,6 +11,7 @@ import homeassistant.util.dt as dt_util
 
 from . import init_integration
 
+from tests.async_mock import patch
 from tests.common import async_fire_time_changed, async_mock_service
 from tests.components.blueprint.conftest import stub_blueprint_populate  # noqa
 
@@ -230,3 +231,44 @@ async def test_held_in_range_long(hass, calls, mock_litejet):
     assert len(calls) == 0
     await simulate_release(hass, mock_litejet, ENTITY_OTHER_SWITCH_NUMBER)
     assert len(calls) == 0
+
+
+async def test_reload(hass, calls, mock_litejet):
+    """Test reloading automation."""
+    await setup_automation(
+        hass,
+        {
+            "platform": "litejet",
+            "number": ENTITY_OTHER_SWITCH_NUMBER,
+            "held_more_than": {"milliseconds": "100"},
+            "held_less_than": {"milliseconds": "300"},
+        },
+    )
+
+    with patch(
+        "homeassistant.config.load_yaml_config_file",
+        autospec=True,
+        return_value={
+            "automation": {
+                "trigger": {
+                    "platform": "litejet",
+                    "number": ENTITY_OTHER_SWITCH_NUMBER,
+                    "held_more_than": {"milliseconds": "1000"},
+                },
+                "action": {"service": "test.automation"},
+            }
+        },
+    ):
+        await hass.services.async_call(
+            "automation",
+            "reload",
+            blocking=True,
+        )
+        await hass.async_block_till_done()
+
+    await simulate_press(hass, mock_litejet, ENTITY_OTHER_SWITCH_NUMBER)
+    assert len(calls) == 0
+    await simulate_time(hass, mock_litejet, timedelta(seconds=0.5))
+    assert len(calls) == 0
+    await simulate_time(hass, mock_litejet, timedelta(seconds=1.25))
+    assert len(calls) == 1

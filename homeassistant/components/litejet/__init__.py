@@ -22,9 +22,7 @@ CONFIG_SCHEMA = vol.Schema(
 
 def setup(hass, config):
     """Set up the LiteJet component."""
-    hass.data.setdefault(DOMAIN, {})
-
-    if not hass.config_entries.async_entries(DOMAIN) and config[DOMAIN]:
+    if not hass.config_entries.async_entries(DOMAIN) and DOMAIN in config:
         # No config entry exists and configuration.yaml config exists, trigger the import flow.
         hass.async_create_task(
             hass.config_entries.flow.async_init(
@@ -67,7 +65,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     )
 
     if unload_ok:
-        hass.data[DOMAIN][entry.entry_id].close()
-        hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN].close()
+        hass.data.pop(DOMAIN)
 
     return unload_ok
