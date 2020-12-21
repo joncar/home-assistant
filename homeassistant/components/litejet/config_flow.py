@@ -2,13 +2,13 @@
 import logging
 from typing import Any, Dict, Optional
 
+import pylitejet
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_PORT
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
-import pylitejet
 
 from .const import CONF_DEFAULT_TRANSITION, DOMAIN
 
