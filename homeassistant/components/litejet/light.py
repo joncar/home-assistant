@@ -3,13 +3,11 @@ import logging
 
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
-    ATTR_TRANSITION,
     SUPPORT_BRIGHTNESS,
-    SUPPORT_TRANSITION,
     LightEntity,
 )
 
-from .const import CONF_DEFAULT_TRANSITION, DOMAIN
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,7 +54,7 @@ class LiteJetLight(LightEntity):
     @property
     def supported_features(self):
         """Flag supported features."""
-        return SUPPORT_BRIGHTNESS | SUPPORT_TRANSITION
+        return SUPPORT_BRIGHTNESS
 
     @property
     def name(self):
@@ -90,37 +88,16 @@ class LiteJetLight(LightEntity):
 
     def turn_on(self, **kwargs):
         """Turn on the light."""
-        is_complex = False
-        brightness = 99
-        transition = self._config_entry.options.get(CONF_DEFAULT_TRANSITION, 0)
-
         if ATTR_BRIGHTNESS in kwargs:
-            is_complex = True
             brightness = int(kwargs[ATTR_BRIGHTNESS] / 255 * 99)
-
-        if ATTR_TRANSITION in kwargs:
-            is_complex = True
-            transition = kwargs[ATTR_TRANSITION]
-
-        if is_complex:
-            self._lj.activate_load_at(self._index, brightness, int(transition))
+            self._lj.activate_load_at(self._index, brightness, 0)
         else:
             self._lj.activate_load(self._index)
 
     def turn_off(self, **kwargs):
         """Turn off the light."""
-        is_complex = False
-        transition = self._config_entry.options.get(CONF_DEFAULT_TRANSITION, 0)
-
-        if ATTR_TRANSITION in kwargs:
-            is_complex = True
-            transition = kwargs[ATTR_TRANSITION]
-
-        if is_complex:
-            self._lj.activate_load_at(self._index, 0, transition)
-        else:
-            self._lj.deactivate_load(self._index)
+        self._lj.deactivate_load(self._index)
 
     def update(self):
         """Retrieve the light's brightness from the LiteJet system."""
-        self._brightness = int(self._lj.get_load_level(self._index) / 99 * 255)
+        self._brightness = self._lj.get_load_level(self._index) / 99 * 255
