@@ -29,12 +29,9 @@ class LiteJetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 system = pylitejet.LiteJet(port)
                 system.close()
-                okay = True
             except Exception:  # pylint: disable=broad-except
                 errors[CONF_PORT] = "open_failed"
-                okay = False
-
-            if okay:
+            else:
                 return self.async_create_entry(
                     title=port,
                     data={CONF_PORT: port},
