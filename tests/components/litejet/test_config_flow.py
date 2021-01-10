@@ -1,8 +1,9 @@
 """Tests for LiteJet config flow."""
+from unittest.mock import patch
+
 from homeassistant.components.litejet.const import DOMAIN
 from homeassistant.const import CONF_PORT
 
-from tests.async_mock import patch
 from tests.common import MockConfigEntry
 
 

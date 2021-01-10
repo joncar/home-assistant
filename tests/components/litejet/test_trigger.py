@@ -2,6 +2,7 @@
 from datetime import timedelta
 import logging
 from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
@@ -11,7 +12,6 @@ import homeassistant.util.dt as dt_util
 
 from . import init_integration
 
-from tests.async_mock import patch
 from tests.common import async_fire_time_changed, async_mock_service
 from tests.components.blueprint.conftest import stub_blueprint_populate  # noqa
 

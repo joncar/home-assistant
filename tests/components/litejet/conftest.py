@@ -1,11 +1,10 @@
 """Fixtures for LiteJet testing."""
 from datetime import timedelta
+from unittest.mock import patch
 
 import pytest
 
 import homeassistant.util.dt as dt_util
-
-from tests.async_mock import patch
 
 
 @pytest.fixture
