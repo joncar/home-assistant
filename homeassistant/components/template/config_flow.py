@@ -35,6 +35,7 @@ from homeassistant.helpers.schema_config_entry_flow import (
 )
 
 from .binary_sensor import async_create_preview_binary_sensor
+from .calendar import async_create_preview_calendar
 from .const import DOMAIN
 from .sensor import async_create_preview_sensor
 from .template_entity import TemplateEntity
@@ -96,7 +97,8 @@ def generate_schema(domain: str, flow_type: str) -> dict[vol.Marker, Any]:
             ),
         }
 
-    schema[vol.Optional(CONF_DEVICE_ID)] = selector.DeviceSelector()
+    if domain != Platform.CALENDAR:
+        schema[vol.Optional(CONF_DEVICE_ID)] = selector.DeviceSelector()
 
     return schema
 
@@ -199,6 +201,7 @@ def validate_user_input(
 
 TEMPLATE_TYPES = [
     "binary_sensor",
+    "calendar",
     "sensor",
 ]
 
@@ -208,6 +211,11 @@ CONFIG_FLOW = {
         config_schema(Platform.BINARY_SENSOR),
         preview="template",
         validate_user_input=validate_user_input(Platform.BINARY_SENSOR),
+    ),
+    Platform.CALENDAR: SchemaFlowFormStep(
+        config_schema(Platform.CALENDAR),
+        preview="template",
+        validate_user_input=validate_user_input(Platform.CALENDAR),
     ),
     Platform.SENSOR: SchemaFlowFormStep(
         config_schema(Platform.SENSOR),
@@ -224,6 +232,11 @@ OPTIONS_FLOW = {
         preview="template",
         validate_user_input=validate_user_input(Platform.BINARY_SENSOR),
     ),
+    Platform.CALENDAR: SchemaFlowFormStep(
+        options_schema(Platform.CALENDAR),
+        preview="template",
+        validate_user_input=validate_user_input(Platform.CALENDAR),
+    ),
     Platform.SENSOR: SchemaFlowFormStep(
         options_schema(Platform.SENSOR),
         preview="template",
@@ -236,6 +249,7 @@ CREATE_PREVIEW_ENTITY: dict[
     Callable[[HomeAssistant, str, dict[str, Any]], TemplateEntity],
 ] = {
     "binary_sensor": async_create_preview_binary_sensor,
+    "calendar": async_create_preview_calendar,
     "sensor": async_create_preview_sensor,
 }
 

@@ -27,10 +27,21 @@
         },
         "title": "Template sensor"
       },
+      "calendar": {
+        "data": {
+          "name": "[%key:common::config_flow::data::name%]",
+          "state": "Events"
+        },
+        "data_description": {
+          "state": "Template should generate a list of objects with keys summary, start, end, location, description."
+        },
+        "title": "Template calendar"
+      },
       "user": {
         "description": "This helper allows you to create helper entities that define their state using a template.",
         "menu_options": {
           "binary_sensor": "Template a binary sensor",
+          "calendar": "Template a calendar",
           "sensor": "Template a sensor"
         },
         "title": "Template helper"
